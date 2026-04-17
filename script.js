@@ -6,20 +6,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultAmount = document.getElementById('result-amount');
 
     // Navbar scroll effect
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
-    });
+    if (navbar) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    }
 
     // Calculator Logic
     const calculateSavings = () => {
+        if (!monthlySaveInput || !yearsInput || !interestInput || !resultAmount) return;
+
         const P = parseFloat(monthlySaveInput.value) || 0;
         const t = parseFloat(yearsInput.value) || 0;
         const annualRate = (parseFloat(interestInput.value) || 0) / 100;
-        
+
         if (P <= 0 || t <= 0) {
             resultAmount.textContent = 'R$ 0,00';
             return;
@@ -39,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         resultAmount.textContent = formatter.format(fv);
-        
+
         // Add a small scale animation to the result
         resultAmount.style.transform = 'scale(1.1)';
         setTimeout(() => {
@@ -49,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event Listeners for Real-time calculation
     [monthlySaveInput, yearsInput, interestInput].forEach(input => {
-        input.addEventListener('input', calculateSavings);
+        if (input) input.addEventListener('input', calculateSavings);
     });
 
     // Initial calculation
@@ -61,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const targetId = this.getAttribute('href');
             if (targetId === '#') return;
-            
+
             const targetElement = document.querySelector(targetId);
             if (targetElement) {
                 window.scrollTo({
@@ -85,6 +89,60 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }, observerOptions);
+
+    // Registration Modal Logic
+    const modal = document.getElementById('register-modal');
+    const registerForm = document.getElementById('register-form');
+
+    if (modal && registerForm) {
+        const isRegistered = localStorage.getItem('poupe_me_registered');
+
+        if (!isRegistered) {
+            // Show modal after 1.5s delay
+            setTimeout(() => {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }, 1500);
+        }
+
+        const closeModal = () => {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+
+        // Close on click outside - REMOVED for mandatory registration
+        /*
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+        */
+
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value;
+            const phone = document.getElementById('reg-phone').value;
+
+            console.log('Registration Attempt:', { name, phone });
+
+            // Save to localStorage
+            localStorage.setItem('poupe_me_registered', 'true');
+
+            // Show success state
+            const header = modal.querySelector('.modal-header');
+            if (header) {
+                header.innerHTML = `
+                    <h2>Sucesso!</h2>
+                    <p>Obrigado, ${name.split(' ')[0]}. Agora você faz parte da Poupe-me.</p>
+                `;
+            }
+            registerForm.style.display = 'none';
+
+            // Close ONLY after success, with a small delay to see the message
+            setTimeout(closeModal, 2000);
+        });
+    }
 
     document.querySelectorAll('.stat-card, .calc-card, .calc-info').forEach(el => {
         el.style.opacity = '0';
