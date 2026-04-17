@@ -6,10 +6,10 @@
     --accent: #f2b11c;
     --accent-dim: #a67c14;
     --accent-glow: #f2b11c;
-    --text-primary: #5e241d;
-    --text-muted: #5e241d;
-    --glass-surface: #5e241d;
-    --glass-border: #5e241d;
+    --text-primary: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.6);
+    --glass-surface: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.08);
     --transition-smooth: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
