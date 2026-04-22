@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poupe me</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Quicksand:wght@300;500&family=Press+Start+2P&display=swap');
+
+        :root {
+            --sky-top: #1a1a2e;
+            --sky-bottom: #16213e;
+            --ground: #1b4332;
+            --path: #3d2b1f;
+            --magic: #e94560;
+            --wizard: #4e4e8d;
+            --tree-color: #3d2b1f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
+            font-family: 'Quicksand', sans-serif;
+            color: white;
+        }
+
+        #game-world {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--sky-top), var(--sky-bottom));
+            overflow: hidden;
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            box-shadow: 10px 10px white, 150px 200px white, 300px 50px white, 600px 300px white, 800px 150px white, 1000px 50px white, 1200px 250px white;
+            opacity: 0.3;
+        }
+
+        .mountains {
+            position: absolute;
+            bottom: 100px;
+            width: 200%;
+            height: 300px;
+            background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+            clip-path: polygon(0% 100%, 10% 20%, 20% 100%, 30% 40%, 40% 100%, 50% 10%, 60% 100%, 70% 30%, 80% 100%, 90% 20%, 100% 100%);
+            left: 0;
+        }
+
+        .ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 100px; /* Reduzido de 150px */
+            background-color: var(--ground);
+            z-index: 1;
+        }
+
+        .path {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 40px; /* Reduzido de 60px */
+            background-color: var(--path);
+            border-top: 4px solid #2a1d15;
+            z-index: 2;
+        }
+
+        #wizard {
+            position: absolute;
+            bottom: 30px; /* Ajustado para o novo chão */
+            left: 100px;
+            width: 80px;
+            height: 120px;
+            z-index: 20; /* Garantido acima de tudo */
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 150'%3E%3Cpath d='M50 35c8.3 0 15-6.7 15-15S58.3 5 50 5s-15 6.7-15 15 6.7 15 15 15z' fill='%23ffdbac'/%3E%3Cpath d='M35 20c0-8.3 6.7-15 15-15s15 6.7 15 15c0 3.3-1.1 6.3-3 8.7C63.4 22 58.4 18 50 18s-13.4 4-17 10.7c-1.9-2.4-3-5.4-3-8.7z' fill='%234b3621'/%3E%3Cpath d='M25 140v-60c0-10 10-20 25-20s25 10 25 20v60H25z' fill='%232a2a2a'/%3E%3Cpath d='M50 60l10 20-10 10-10-10z' fill='%23fff'/%3E%3Cpath d='M48 60h4v30h-4z' fill='%238b0000'/%3E%3Cpath d='M50 35c2 0 3.5-1.5 3.5-3.5S52 28 50 28s-3.5 1.5-3.5 3.5 1.5 3.5 3.5 3.5z' fill='%23ffdbac'/%3E%3Cpath d='M40 22h5v1h-5zM55 22h5v1h-5z' fill='%23000'/%3E%3C/svg%3E") no-repeat center;
+            background-size: contain;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+        }
+
+        .walking {
+            animation: bob 0.6s infinite ease-in-out;
+        }
+
+        @keyframes bob {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .vendor {
+            position: absolute;
+            bottom: 40px;
+            right: -200px;
+            width: 100px;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .vendor-stall {
+            width: 80px;
+            height: 60px;
+            background: #795548;
+            border-top: 10px solid #a1887f;
+            position: relative;
+        }
+
+        .vendor-person {
+            width: 30px;
+            height: 50px;
+            background: #d84315;
+            border-radius: 10px;
+            margin-bottom: -10px;
+        }
+
+        #dialog-box {
+            position: absolute;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid var(--magic);
+            border-radius: 15px;
+            padding: 20px;
+            display: none;
+            z-index: 100;
+        }
+
+        #dialog-box h2 {
+            font-family: 'Cinzel', serif;
+            color: var(--magic);
+            margin-bottom: 10px;
+        }
+
+        .option-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.3s;
+            border-radius: 5px;
+        }
+
+        .option-btn:hover {
+            background: var(--magic);
+            border-color: white;
+        }
+
+        #status-hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 200;
+        }
+
+        #adventure-ui {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            display: none;
+            z-index: 200;
+            color: #ffd700;
+            text-align: right;
+        }
+
+        #adventure-msg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            display: none;
+            z-index: 300;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 30px;
+            border: 2px solid var(--magic);
+            border-radius: 20px;
+        }
+
+        #adventure-msg h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 40px;
+            color: var(--magic);
+            margin-bottom: 10px;
+        }
+
+        .obstacle {
+            position: absolute;
+            bottom: 30px; /* Sincronizado com o wizard */
+            width: 40px;
+            height: 40px;
+            background: var(--magic);
+            border: 3px solid white;
+            border-radius: 8px;
+            z-index: 25; /* Acima do boneco se necessário */
+            box-shadow: 0 0 20px var(--magic);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .obstacle::before {
+            content: '📦';
+            font-size: 20px;
+        }
+
+        #win-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        #win-screen h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 50px;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 28px;
+            margin: 20px 0;
+            font-family: 'Cinzel', serif;
+            text-shadow: 0 0 10px gold;
+        }
+
+        #game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(42, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        #game-over-screen h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 45px;
+            color: var(--magic);
+            margin-bottom: 15px;
+        }
+
+        #game-over-screen p {
+            font-size: 18px;
+            margin-bottom: 25px;
+            color: #ffd700;
+        }
+
+        #reward-banner {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.8), transparent);
+            color: white;
+            padding: 10px 40px;
+            font-family: 'Cinzel', serif;
+            font-weight: bold;
+            font-size: 18px;
+            text-align: center;
+            z-index: 500;
+            display: none;
+            white-space: nowrap;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+            border-top: 1px solid var(--gold);
+            border-bottom: 1px solid var(--gold);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="game-world">
+        <div id="reward-banner">🏆 PARABÉNS! VOCÊ GANHOU UMA CONSULTORIA GRÁTIS!</div>
+        <div class="stars"></div>
+        <div id="mountains" class="mountains"></div>
+
+        <div id="status-hud">
+            Perguntas para o Comprador: <span id="wisdom-display">0</span>
+        </div>
+
+        <div id="adventure-ui">
+            PROGRESSO: <span id="total-points">0</span> / 100
+        </div>
+
+        <div id="wizard">
+        </div>
+
+        <div id="vendor-container"></div>
+        <div id="obstacle-container"></div>
+
+        <div class="ground">
+            <div class="path"></div>
+        </div>
+
+        <div id="dialog-box">
+            <h2 id="vendor-name">Mercador</h2>
+            <p id="dialog-text">O que você busca, viajante?</p>
+            <div id="options-container"></div>
+        </div>
+
+        <div id="adventure-msg">
+            <h1 id="msg-title">A CORRIDA PELA EFICIÊNCIA!</h1>
+            <p id="msg-desc">Pule com ESPAÇO!</p>
+            <p id="msg-sub" style="color: #ffd700; margin-top: 10px;">Chegue a 100 pontos para otimizar seus custos!</p>
+        </div>
+
+        <div id="win-screen">
+            <h1>VITÓRIA!</h1>
+            <div class="highlight">VOCÊ GANHOU UMA CONSULTORIA GRÁTIS!</div>
+            <button class="option-btn" style="width: auto; padding: 15px 40px;" onclick="location.reload()">RESGATAR E JOGAR NOVAMENTE</button>
+        </div>
+
+        <div id="game-over-screen">
+            <h1>OPS! VOCÊ BATEU!</h1>
+            <p>Não desista, o prêmio está te esperando!</p>
+            <button class="option-btn" style="width: auto; padding: 15px 40px;" onclick="restartRun()">TENTAR DE NOVO (REPLAY)</button>
+        </div>
+    </div>
+
+    <script>
+        const wizardEl = document.getElementById('wizard');
+        const mountainsEl = document.getElementById('mountains');
+        const dialogBox = document.getElementById('dialog-box');
+        const optionsContainer = document.getElementById('options-container');
+        const vendorNameEl = document.getElementById('vendor-name');
+        const dialogTextEl = document.getElementById('dialog-text');
+        const wisdomDisplay = document.getElementById('wisdom-display');
+        const adventureUI = document.getElementById('adventure-ui');
+        const adventureMsg = document.getElementById('adventure-msg');
+        const totalPointsEl = document.getElementById('total-points');
+        const obstacleContainer = document.getElementById('obstacle-container');
+        const winScreen = document.getElementById('win-screen');
+        const msgTitle = document.getElementById('msg-title');
+        const msgDesc = document.getElementById('msg-desc');
+        const msgSub = document.getElementById('msg-sub');
+
+        let wisdom = 0;
+        let runPoints = 0;
+        let isWalking = true;
+        let isAdventureMode = false;
+        let canCollide = false;
+        let distance = 0;
+        let currentVendorIndex = 0;
+        let mountainPos = 0;
+        let activeVendorDiv = null;
+        let nextVendorAt = 800;
+
+        let wizBottom = 30;
+        let vy = 0;
+        let isJumping = false;
+        let gameSpeed = 7;
+        let obstacles = [];
+        let frameCounter = 0;
+
+        const gravity = 0.6;
+        const jumpPower = -15;
+        const groundLevel = 30; // Nova variável para facilitar ajustes
+
+        const vendors = [
+            {
+                name: "O Comprador", color: "#d84315",
+                question: { text: "Qual destes elementos é a base da sua estratégia?", options: [{ text: "Preço Baixo", w: 10 }, { text: "Qualidade de Entrega", w: 15 }, { text: "Relacionamento", w: 12 }] }
+            },
+            {
+                name: "A Gestora de Logística", color: "#2e7d32",
+                question: { text: "O que é mais crítico na sua operação hoje?", options: [{ text: "Prazo de Entrega", w: 10 }, { text: "Giro de Estoque", w: 15 }, { text: "Eficiência de Custos", w: 12 }] }
+            },
+            {
+                name: "O Diretor de Compras", color: "#455a64",
+                question: { text: "O que garante o sucesso de um contrato de suprimentos?", options: [{ text: "Compliance Total", w: 10 }, { text: "Parceria Técnica", w: 15 }, { text: "Planejamento Estratégico", w: 12 }] }
+            }
+        ];
+
+        function gameLoop() {
+            if (isWalking) {
+                distance += isAdventureMode ? gameSpeed : 5;
+                mountainPos -= isAdventureMode ? gameSpeed / 4 : 1;
+                mountainsEl.style.left = (mountainPos % window.innerWidth) + "px";
+                wizardEl.classList.add('walking');
+
+                if (!isAdventureMode) {
+                    if (activeVendorDiv) {
+                        let r = parseInt(activeVendorDiv.style.right || -200);
+                        r += 5;
+                        activeVendorDiv.style.right = r + "px";
+                        if (r > window.innerWidth - 300) reachVendor();
+                    }
+                    if (distance >= nextVendorAt && currentVendorIndex < vendors.length) {
+                        spawnVendor();
+                        nextVendorAt += 1500;
+                    }
+                    if (currentVendorIndex >= vendors.length && distance > nextVendorAt - 200) {
+                        initAdventure();
+                    }
+                } else {
+                    frameCounter++;
+                    if (canCollide) {
+                        if (frameCounter % 40 === 0) {
+                            runPoints++;
+                            updateTotal();
+                        }
+                        // Start obstacles much sooner after message (frameCounter 60 instead of 180)
+                        if (frameCounter > 40 && frameCounter % Math.max(60, Math.floor(120 - gameSpeed * 2)) === 0) {
+                            spawnObstacle();
+                        }
+                        moveObstacles();
+                        gameSpeed += 0.0005;
+                    }
+                    if (isJumping) {
+                        vy += gravity;
+                        wizBottom -= vy;
+                        if (wizBottom <= groundLevel) { wizBottom = groundLevel; isJumping = false; vy = 0; }
+                        wizardEl.style.bottom = wizBottom + "px";
+                    }
+                }
+            } else {
+                wizardEl.classList.remove('walking');
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        function updateTotal() {
+            const total = wisdom + runPoints;
+            totalPointsEl.textContent = total;
+            
+            if (total >= 100) {
+                document.getElementById('reward-banner').style.display = 'block';
+            }
+        }
+
+        function spawnVendor() {
+            const v = vendors[currentVendorIndex];
+            const div = document.createElement('div');
+            div.className = 'vendor';
+            div.style.right = "-200px";
+            div.innerHTML = `<div class="vendor-person" style="background: ${v.color}"></div><div class="vendor-stall"></div>`;
+            document.getElementById('vendor-container').appendChild(div);
+            activeVendorDiv = div;
+        }
+
+        function reachVendor() {
+            isWalking = false;
+            vendorNameEl.textContent = vendors[currentVendorIndex].name;
+            const q = vendors[currentVendorIndex].question;
+            dialogTextEl.textContent = q.text;
+            optionsContainer.innerHTML = '';
+            q.options.forEach(o => {
+                const b = document.createElement('button');
+                b.className = 'option-btn';
+                b.textContent = o.text;
+                b.onclick = () => {
+                    wisdom += o.w;
+                    wisdomDisplay.textContent = wisdom;
+                    leaveVendor();
+                };
+                optionsContainer.appendChild(b);
+            });
+            dialogBox.style.display = 'block';
+        }
+
+        function leaveVendor() {
+            dialogBox.style.display = 'none';
+            currentVendorIndex++;
+            const v = activeVendorDiv;
+            const timer = setInterval(() => {
+                let r = parseInt(v.style.right);
+                r += 10;
+                v.style.right = r + "px";
+                if (r > window.innerWidth + 200) { clearInterval(timer); v.remove(); }
+            }, 16);
+            activeVendorDiv = null;
+            isWalking = true;
+        }
+
+        function initAdventure(isRestart = false) {
+            isWalking = false;
+            isAdventureMode = true;
+            updateTotal();
+
+            if (isRestart) {
+                const total = wisdom + runPoints;
+                msgTitle.textContent = "QUASE LÁ!";
+                msgDesc.textContent = "TENTE DE NOVO, UM PRÊMIO TE ESPERA! 🎁";
+                msgSub.textContent = "Pule com ESPAÇO ou TOQUE na tela!";
+            } else {
+                msgTitle.textContent = "A CORRIDA FINAL!";
+                msgDesc.textContent = "Pule com ESPAÇO ou TOQUE na tela!";
+                msgSub.textContent = "Chegue a 100 pontos para ganhar!";
+            }
+
+            adventureMsg.style.display = 'block';
+            setTimeout(() => {
+                adventureMsg.style.display = 'none';
+                adventureUI.style.display = 'block';
+                isWalking = true;
+                frameCounter = 0;
+                setTimeout(() => { canCollide = true; }, 1000);
+            }, 2500); // Slightly faster message
+        }
+
+        function spawnObstacle() {
+            const o = document.createElement('div');
+            o.className = 'obstacle';
+            o.style.right = '-50px';
+            o.style.bottom = groundLevel + 'px';
+            obstacleContainer.appendChild(o);
+            obstacles.push({ el: o, right: -50 });
+        }
+
+        function moveObstacles() {
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].right += gameSpeed;
+                obstacles[i].el.style.right = obstacles[i].right + "px";
+                if (canCollide) {
+                    const wizardX = 100;
+                    const wizardWidth = 40;
+                    const obstacleX = window.innerWidth - obstacles[i].right - 40; 
+                    if (wizardX + wizardWidth > obstacleX && wizardX < obstacleX + 40) {
+                        // Se o pé do mago estiver abaixo do topo do obstáculo (groundLevel + 40)
+                        if (wizBottom < groundLevel + 40) gameOver();
+                    }
+                }
+                if (obstacles[i].right > window.innerWidth + 100) {
+                    obstacles[i].el.remove();
+                    obstacles.splice(i, 1);
+                }
+            }
+        }
+
+        function gameOver() {
+            const total = wisdom + runPoints;
+            isWalking = false;
+            canCollide = false;
+
+            // Para todas as animações
+            wizardEl.classList.remove('walking');
+
+            if (total >= 100) {
+                winGame();
+                return;
+            }
+
+            document.getElementById('game-over-screen').style.display = 'flex';
+        }
+
+        function restartRun() {
+            document.getElementById('game-over-screen').style.display = 'none';
+            
+            // Limpa obstáculos
+            obstacles.forEach(obs => obs.el.remove());
+            obstacles = [];
+
+            runPoints = 0;
+            wizBottom = groundLevel;
+            wizardEl.style.bottom = groundLevel + "px";
+            gameSpeed = 7;
+            frameCounter = 0;
+
+            initAdventure(true);
+        }
+
+        function winGame() {
+            isWalking = false;
+            canCollide = false;
+            winScreen.style.display = 'flex';
+        }
+
+        function triggerJump() {
+            if (!isJumping && isAdventureMode && isWalking) {
+                isJumping = true;
+                vy = jumpPower;
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                triggerJump();
+                e.preventDefault();
+            }
+        });
+
+        window.addEventListener('touchstart', (e) => {
+            triggerJump();
+            // Evita comportamentos padrão de zoom/scroll no toque
+            if (isAdventureMode) e.preventDefault();
+        }, { passive: false });
+
+        gameLoop();
+    </script>
+</body>
+
+</html>
