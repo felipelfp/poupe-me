@@ -1,7 +1,51 @@
 /* --- CONSOLIDATED SCRIPT.JS --- */
 
+// --- ÁREA GLOBAL DE SEGURANÇA (ADMIN) ---
+let isExporting = false;
+window.exportLeadsReport = function() {
+    if (isExporting) return;
+    isExporting = true;
+    try {
+        const password = prompt("Digite a senha de administrador para baixar os leads:");
+        if (password === null) { isExporting = false; return; }
+        if (password !== "poupeme123") {
+            alert("Senha incorreta! Acesso negado.");
+            isExporting = false;
+            return;
+        }
+        const leads = JSON.parse(localStorage.getItem('poupeme_leads') || '[]');
+        if (leads.length === 0) { alert('Nenhum lead encontrado ainda.'); isExporting = false; return; }
+        let csv = "\uFEFFData;Nome;Telefone;Empresa;Pontos;Escolhas\n";
+        leads.forEach(l => { 
+            const choices = (l.escolhas || "[]").replace(/"/g, "'");
+            csv += `${l.data || ''};${l.nome || ''};${l.telefone || ''};${l.empresa || ''};${l.pontos || 0};${choices}\n`; 
+        });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "leads_poupeme.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error("Erro ao exportar:", e);
+        alert("Ocorreu um erro ao gerar o relatório.");
+    }
+    isExporting = false;
+};
+
+// Atalho Secreto Global: Shift + Alt + L
+window.addEventListener('keydown', (e) => {
+    if (e.shiftKey && e.altKey && e.code === 'KeyL') {
+        window.exportLeadsReport();
+    }
+});
+
 // --- JORNADA DA EFICIÊNCIA (MAPA) LOGIC ---
-(function() {
+(function () {
     const positions = [10, 24, 38, 52, 66, 80, 92];
     const thoughts = [
         "Ai meu Deus, acabou tudo! E agora?!",
@@ -59,25 +103,20 @@
 
     function applySolution() {
         if (currentStep < 2) return;
-        
         const isMobile = window.innerWidth <= 600;
-        
         player.style.transition = "all 0.8s ease-in-out";
         currentStep = 0;
         updatePlayerPos();
         bubbleText.innerText = "Voltando para o início...";
-
         setTimeout(() => {
             const pathId = isMobile ? 'mapa-jump-path-mobile' : 'mapa-jump-path';
             const pathEl = document.getElementById(pathId);
             if (pathEl) pathEl.style.display = 'block';
             bubbleText.innerText = "SALTO DE EFICIÊNCIA! 🚀";
-            
             setTimeout(() => {
                 player.style.left = '';
                 player.style.top = '';
                 player.style.transition = 'none';
-
                 if (!isMobile) {
                     player.classList.add('leaping');
                     currentStep = 6;
@@ -85,12 +124,10 @@
                     player.classList.add('leaping-mobile');
                     currentStep = 6;
                 }
-                
                 setTimeout(() => {
                     bubbleText.innerText = "A Poupe-me resolveu tudo! 🎯";
                     setTimeout(() => {
                         if (pathEl) pathEl.style.display = 'none';
-                        
                         setTimeout(() => {
                             player.classList.remove('leaping', 'leaping-mobile');
                             player.style.transition = 'all 0.5s ease';
@@ -124,9 +161,8 @@
     startAutoJourney();
 })();
 
-
 // --- JORNADA DO COMPRADOR (CAMINHO) LOGIC ---
-(function() {
+(function () {
     const wizardEl = document.getElementById('caminho-wizard');
     const mountainsEl = document.getElementById('caminho-mountains');
     const dialogBox = document.getElementById('caminho-dialog-box');
@@ -177,13 +213,11 @@
     function gameLoop() {
         const gameWrapper = document.getElementById('caminho-game-wrapper');
         const wrapperWidth = gameWrapper.offsetWidth;
-
         if (isWalking) {
             distance += isAdventureMode ? gameSpeed : 5;
             mountainPos -= isAdventureMode ? gameSpeed / 4 : 1;
             mountainsEl.style.left = (mountainPos % wrapperWidth) + "px";
             wizardEl.classList.add('walking');
-
             if (!isAdventureMode) {
                 if (activeVendorDiv) {
                     let r = parseInt(activeVendorDiv.style.right || -200);
@@ -201,26 +235,18 @@
             } else {
                 frameCounter++;
                 if (canCollide) {
-                    if (frameCounter % 40 === 0) {
-                        runPoints++;
-                        updateTotal();
-                    }
-                    if (frameCounter > 40 && frameCounter % Math.max(60, Math.floor(120 - gameSpeed * 2)) === 0) {
-                        spawnObstacle();
-                    }
+                    if (frameCounter % 40 === 0) { runPoints++; updateTotal(); }
+                    if (frameCounter > 40 && frameCounter % Math.max(60, Math.floor(120 - gameSpeed * 2)) === 0) { spawnObstacle(); }
                     moveObstacles(wrapperWidth);
                     gameSpeed += 0.0005;
                 }
                 if (isJumping) {
-                    vy += gravity;
-                    wizBottom -= vy;
+                    vy += gravity; wizBottom -= vy;
                     if (wizBottom <= groundLevel) { wizBottom = groundLevel; isJumping = false; vy = 0; }
                     wizardEl.style.bottom = wizBottom + "px";
                 }
             }
-        } else {
-            wizardEl.classList.remove('walking');
-        }
+        } else { wizardEl.classList.remove('walking'); }
         requestAnimationFrame(gameLoop);
     }
 
@@ -240,6 +266,8 @@
         activeVendorDiv = div;
     }
 
+    let userChoices = [];
+
     function reachVendor() {
         isWalking = false;
         vendorNameEl.textContent = vendors[currentVendorIndex].name;
@@ -253,6 +281,7 @@
             b.onclick = () => {
                 wisdom += o.w;
                 wisdomDisplay.textContent = wisdom;
+                userChoices.push({ vendedor: vendors[currentVendorIndex].name, escolha: o.text, pontos: o.w });
                 leaveVendor();
             };
             optionsContainer.appendChild(b);
@@ -277,10 +306,7 @@
     }
 
     function initAdventure(isRestart = false) {
-        isWalking = false;
-        isAdventureMode = true;
-        updateTotal();
-
+        isWalking = false; isAdventureMode = true; updateTotal();
         if (isRestart) {
             msgTitle.textContent = "QUASE LÁ!";
             msgDesc.textContent = "TENTE DE NOVO, UM PRÊMIO TE ESPERA! 🎁";
@@ -290,22 +316,18 @@
             msgDesc.textContent = "Pule com ESPAÇO ou TOQUE na tela!";
             msgSub.textContent = "Chegue a 100 pontos para ganhar!";
         }
-
         adventureMsg.style.display = 'block';
         setTimeout(() => {
             adventureMsg.style.display = 'none';
             adventureUI.style.display = 'block';
-            isWalking = true;
-            frameCounter = 0;
+            isWalking = true; frameCounter = 0;
             setTimeout(() => { canCollide = true; }, 1000);
         }, 2500);
     }
 
     function spawnObstacle() {
         const o = document.createElement('div');
-        o.className = 'obstacle';
-        o.style.right = '-50px';
-        o.style.bottom = groundLevel + 'px';
+        o.className = 'obstacle'; o.style.right = '-50px'; o.style.bottom = groundLevel + 'px';
         obstacleContainer.appendChild(o);
         obstacles.push({ el: o, right: -50 });
     }
@@ -315,65 +337,41 @@
             obstacles[i].right += gameSpeed;
             obstacles[i].el.style.right = obstacles[i].right + "px";
             if (canCollide) {
-                const wizardX = 100;
-                const wizardWidth = 40;
-                const obstacleX = wrapperWidth - obstacles[i].right - 40; 
+                const wizardX = 100; const wizardWidth = 40;
+                const obstacleX = wrapperWidth - obstacles[i].right - 40;
                 if (wizardX + wizardWidth > obstacleX && wizardX < obstacleX + 40) {
                     if (wizBottom < groundLevel + 40) gameOver();
                 }
             }
-            if (obstacles[i].right > wrapperWidth + 100) {
-                obstacles[i].el.remove();
-                obstacles.splice(i, 1);
-            }
+            if (obstacles[i].right > wrapperWidth + 100) { obstacles[i].el.remove(); obstacles.splice(i, 1); }
         }
     }
 
     function gameOver() {
         const total = wisdom + runPoints;
-        isWalking = false;
-        canCollide = false;
-        wizardEl.classList.remove('walking');
-        if (total >= 100) {
-            winGame();
-        } else {
-            gameOverScreen.style.display = 'flex';
-        }
+        isWalking = false; canCollide = false; wizardEl.classList.remove('walking');
+        if (total >= 100) { winGame(); } else { gameOverScreen.style.display = 'flex'; }
     }
 
-    window.restartCaminhoRun = function() {
+    window.restartCaminhoRun = function () {
         gameOverScreen.style.display = 'none';
         obstacles.forEach(obs => obs.el.remove());
-        obstacles = [];
-        runPoints = 0;
-        wizBottom = groundLevel;
+        obstacles = []; runPoints = 0; wizBottom = groundLevel;
         wizardEl.style.bottom = groundLevel + "px";
-        gameSpeed = 7;
-        frameCounter = 0;
-        initAdventure(true);
+        gameSpeed = 7; frameCounter = 0; initAdventure(true);
     };
 
-    window.resetCaminhoGame = function() {
-        location.reload();
-    };
+    window.resetCaminhoGame = function () { location.reload(); };
 
-    function winGame() {
-        isWalking = false;
-        canCollide = false;
-        winScreen.style.display = 'flex';
-    }
+    function winGame() { isWalking = false; canCollide = false; winScreen.style.display = 'flex'; }
 
     function triggerJump() {
-        if (!isJumping && isAdventureMode && isWalking) {
-            isJumping = true;
-            vy = jumpPower;
-        }
+        if (!isJumping && isAdventureMode && isWalking) { isJumping = true; vy = jumpPower; }
     }
 
     window.addEventListener('keydown', (e) => {
         if (e.code === 'Space') {
             triggerJump();
-            // Evita scroll se estiver na seção do jogo
             const rect = document.getElementById('jogo').getBoundingClientRect();
             if (rect.top < window.innerHeight && rect.bottom > 0) e.preventDefault();
         }
@@ -388,7 +386,18 @@
     if (leadForm) {
         leadForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            alert('Dados enviados com sucesso! Nossa equipe entrará em contato.');
+            const leadData = {
+                data: new Date().toLocaleString('pt-BR'),
+                nome: document.getElementById('lead-name').value,
+                telefone: document.getElementById('lead-phone').value,
+                empresa: document.getElementById('lead-company').value,
+                pontos: wisdom + runPoints,
+                escolhas: JSON.stringify(userChoices)
+            };
+            let leads = JSON.parse(localStorage.getItem('poupeme_leads') || '[]');
+            leads.push(leadData);
+            localStorage.setItem('poupeme_leads', JSON.stringify(leads));
+            alert('Consultoria resgatada com sucesso! Nossa equipe entrará em contato.');
             location.reload();
         });
     }
