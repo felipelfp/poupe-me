@@ -136,15 +136,16 @@ window.addEventListener('keydown', (e) => {
     let currentVendorIndex = 0;
     let mountainPos = 0;
     let activeVendorDiv = null;
-    let nextVendorAt = 800;
+    let nextVendorAt = 400;
     let userChoices = [];
-
+    let wizLeft = 100; // Posição X base do boneco
     let wizBottom = 100;
     let vy = 0;
     let isJumping = false;
     let gameSpeed = 7;
     let obstacles = [];
     let frameCounter = 0;
+    let highScore = localStorage.getItem('poupeme_highscore') || 0;
 
     const gravity = 0.6;
     const jumpPower = -15;
@@ -157,26 +158,45 @@ window.addEventListener('keydown', (e) => {
     ];
 
     function gameLoop() {
+        // A trava só bloqueia o INÍCIO do jogo (Fase 1)
+        if (localStorage.getItem('poupeme_completed') && !isAdventureMode) {
+            document.getElementById('jogo').innerHTML = `<div style="padding: 50px; text-align: center; color: var(--gold); font-family: 'Cinzel', serif;">
+                <h2>Jornada Concluída!</h2>
+                <p>Você já realizou o seu diagnóstico e garantiu seu recorde. Nossa equipe entrará em contato em breve.</p>
+                <button class="btn-submit" onclick="location.reload()" style="max-width: 200px; margin-top: 20px;">VOLTAR AO INÍCIO</button>
+            </div>`;
+            return;
+        }
+
         const gameWrapper = document.getElementById('caminho-game-wrapper');
         if (!gameWrapper) return;
         const wrapperWidth = gameWrapper.offsetWidth;
 
         if (isWalking) {
-            distance += isAdventureMode ? gameSpeed : 5;
-            mountainPos -= isAdventureMode ? gameSpeed / 4 : 1;
+            distance += isAdventureMode ? gameSpeed : 12; // Velocidade de corrida equilibrada
+            mountainPos -= isAdventureMode ? gameSpeed / 4 : 3; 
             mountainsEl.style.left = (mountainPos % wrapperWidth) + "px";
             wizardEl.classList.add('walking');
 
             if (!isAdventureMode) {
                 if (activeVendorDiv) {
-                    let r = parseInt(activeVendorDiv.style.right || -200);
-                    r += 5;
-                    activeVendorDiv.style.right = r + "px";
-                    if (r > wrapperWidth - 300) reachVendor();
+                    // O boneco corre para a direita em direção ao vendedor
+                    wizLeft += 10; 
+                    wizardEl.style.left = wizLeft + "px";
+
+                    // O vendedor está fixo em right: 100px.
+                    // Calculamos a parada para que o boneco não encoste (distância de ~160px)
+                    const stopPoint = wrapperWidth - 360; 
+                    
+                    if (wizLeft >= stopPoint) {
+                        wizLeft = stopPoint;
+                        wizardEl.style.left = wizLeft + "px";
+                        reachVendor();
+                    }
                 }
-                if (distance >= nextVendorAt && currentVendorIndex < vendors.length) {
+                if (distance >= nextVendorAt && currentVendorIndex < vendors.length && !activeVendorDiv) {
                     spawnVendor();
-                    nextVendorAt += 1500;
+                    nextVendorAt += 800;
                 }
                 if (currentVendorIndex >= vendors.length && distance > nextVendorAt - 200) {
                     isWalking = false;
@@ -202,10 +222,14 @@ window.addEventListener('keydown', (e) => {
     function spawnVendor() {
         const div = document.createElement('div');
         div.className = 'vendor';
-        div.style.right = "-200px";
-        div.innerHTML = `<img src="1-removebg-preview.png" class="vendor-logo"><div class="vendor-stall"></div>`;
+        div.style.right = "100px"; // Aparece parado lá na frente
+        div.style.opacity = "0";
+        div.innerHTML = `<div class="vendor-logo-container"><img src="1-removebg-preview.png" class="vendor-logo"></div><div class="vendor-stall"></div>`;
         vendorContainer.appendChild(div);
         activeVendorDiv = div;
+        
+        // Efeito de fade-in
+        setTimeout(() => div.style.opacity = "1", 50);
     }
 
     function reachVendor() {
@@ -232,14 +256,22 @@ window.addEventListener('keydown', (e) => {
         dialogBox.style.display = 'none';
         currentVendorIndex++;
         const v = activeVendorDiv;
-        const gameWrapper = document.getElementById('caminho-game-wrapper');
-        const wrapperWidth = gameWrapper.offsetWidth;
-        const timer = setInterval(() => {
-            let r = parseInt(v.style.right);
-            r += 10;
-            v.style.right = r + "px";
-            if (r > wrapperWidth + 200) { clearInterval(timer); v.remove(); }
+        
+        // Vendedor some e boneco volta para a posição base
+        v.style.opacity = "0";
+        setTimeout(() => v.remove(), 500);
+        
+        const returnInterval = setInterval(() => {
+            if (wizLeft > 100) {
+                wizLeft -= 5;
+                wizardEl.style.left = wizLeft + "px";
+            } else {
+                wizLeft = 100;
+                wizardEl.style.left = "100px";
+                clearInterval(returnInterval);
+            }
         }, 16);
+
         activeVendorDiv = null;
         isWalking = true;
     }
@@ -254,20 +286,35 @@ window.addEventListener('keydown', (e) => {
     }
 
     window.submitLead = function (event) {
-        if (event) event.preventDefault();
+        // Removido preventDefault para permitir o envio nativo ao iframe oculto
+        
+        // Extrai respostas de forma organizada
+        const resp1 = userChoices.find(c => c.vendedor === "Perfil de Compras")?.escolha || "N/A";
+        const resp2 = userChoices.find(c => c.vendedor === "Estratégia")?.escolha || "N/A";
+        const resp3 = userChoices.find(c => c.vendedor === "Desafios")?.escolha || "N/A";
+
         const leadData = {
             data: new Date().toLocaleString('pt-BR'),
             nome: document.getElementById('lead-name').value,
             telefone: document.getElementById('lead-phone').value,
             empresa: document.getElementById('lead-company').value,
-            escolhas: JSON.stringify(userChoices)
+            perfil: resp1,
+            estrategia: resp2,
+            desafios: resp3,
+            pontos: runPoints
         };
+        
         let leads = JSON.parse(localStorage.getItem('poupeme_leads') || '[]');
         leads.push(leadData);
         localStorage.setItem('poupeme_leads', JSON.stringify(leads));
-
+        
+        console.log("Lead processado localmente e enviado via formulário nativo.");
+        
         winScreen.style.display = 'none';
         consultancyBox.style.display = 'block';
+        
+        // Retornamos true para permitir que o formulário continue seu envio para o target (iframe)
+        return true;
     };
 
     window.requestConsultancy = function () {
@@ -279,6 +326,10 @@ window.addEventListener('keydown', (e) => {
         isWalking = false; 
         isAdventureMode = true; 
         runPoints = 0;
+        
+        // Inicializa o recorde na tela
+        document.getElementById('caminho-high-score').textContent = highScore;
+        
         updateTotal();
         
         adventureMsg.style.display = 'block';
@@ -334,18 +385,31 @@ window.addEventListener('keydown', (e) => {
     window.resetCaminhoGame = function () { location.reload(); };
 
     function winGame() { 
-        isWalking = false; 
-        canCollide = false; 
-        adventureUI.style.display = 'none';
+        // Agora sim, após ganhar a consultoria e estar no modo recorde, marcamos como completo após um tempo
+        localStorage.setItem('poupeme_completed', 'true');
+        
         adventureMsg.style.display = 'block';
         msgTitle.textContent = "🏆 EXCELENTE!";
         msgDesc.textContent = "VOCÊ CONQUISTOU SUA CONSULTORIA!";
-        msgSub.textContent = "Entraremos em contato em breve.";
+        msgSub.textContent = "Continue correndo pelo seu RECORDE!";
+        
+        // Esconde a mensagem após 3 segundos para o jogador ver o caminho
+        setTimeout(() => {
+            adventureMsg.style.display = 'none';
+        }, 3000);
     }
 
     function updateTotal() {
         totalPointsEl.textContent = runPoints;
-        if (runPoints >= 50) winGame();
+        
+        // Atualiza recorde
+        if (runPoints > highScore) {
+            highScore = runPoints;
+            localStorage.setItem('poupeme_highscore', highScore);
+            document.getElementById('caminho-high-score').textContent = highScore;
+        }
+        
+        if (runPoints === 50) winGame(); 
     }
 
     function triggerJump() {
@@ -395,7 +459,7 @@ window.closeSuccessModal = function() {
 }
 
 window.handleDirectLead = function(event, source = 'modal') {
-    event.preventDefault();
+    // Removido preventDefault para permitir o envio nativo ao iframe oculto
     let name, phone, company;
 
     if (source === 'final') {
@@ -421,14 +485,22 @@ window.handleDirectLead = function(event, source = 'modal') {
     leads.push(lead);
     localStorage.setItem('poupeme_leads', JSON.stringify(leads));
 
+    console.log("Lead direto processado localmente e enviado via formulário nativo.");
+
     showSuccessModal();
     
     if (source === 'modal') {
-        closeDirectLeadForm();
-        document.getElementById('direct-lead-form').reset();
+        setTimeout(() => {
+            closeDirectLeadForm();
+            document.getElementById('direct-lead-form').reset();
+        }, 100);
     } else {
-        document.getElementById('final-embedded-form').reset();
+        setTimeout(() => {
+            document.getElementById('final-embedded-form').reset();
+        }, 100);
     }
+    
+    return true;
 }
 
 window.addEventListener('keydown', (e) => {
@@ -440,18 +512,26 @@ window.addEventListener('keydown', (e) => {
 window.exportLeadsReport = function() {
     const leads = JSON.parse(localStorage.getItem('poupeme_leads') || '[]');
     if (leads.length === 0) {
-        showSuccessModal(); // Ou um aviso customizado se preferir
+        showSuccessModal(); 
         return;
     }
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Data,Nome,Telefone,Empresa,Escolhas\n";
+    
+    // Header do CSV com BOM para Excel reconhecer acentos e ponto-e-vírgula para colunas
+    let csvContent = "\ufeff"; 
+    csvContent += "DATA;NOME;TELEFONE;EMPRESA;PERFIL COMPRAS;ESTRATEGIA;DESAFIOS;PONTOS JOGO\n";
+    
     leads.forEach(l => {
-        csvContent += `"${l.data}","${l.nome}","${l.telefone}","${l.empresa}","${l.escolhas.replace(/"/g, '""')}"\n`;
+        // Limpa possíveis aspas ou ponto-e-vírgula dos inputs do usuário para não quebrar o CSV
+        const clean = (txt) => txt ? String(txt).replace(/;/g, ',').replace(/"/g, "'") : "";
+        
+        csvContent += `"${clean(l.data)}";"${clean(l.nome)}";"${clean(l.telefone)}";"${clean(l.empresa)}";"${clean(l.perfil)}";"${clean(l.estrategia)}";"${clean(l.desafios)}";"${l.pontos || 0}"\n`;
     });
-    const encodedUri = encodeURI(csvContent);
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "leads_poupeme.csv");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "leads_elite_poupeme.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
