@@ -29,23 +29,21 @@
 
     <div class="bg-pattern"></div>
 
-    <div id="direct-lead-modal" class="modal-overlay">
-        <div class="modal-content">
-            <button class="close-modal" onclick="closeDirectLeadForm()">×</button>
-            <h2 class="modal-title">Consultoria Estratégica</h2>
-            <p class="modal-desc">Preencha os dados abaixo para receber um contato exclusivo da nossa equipe elite.</p>
-            <form id="direct-lead-form" onsubmit="handleDirectLead(event)">
+            <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+            <form id="direct-lead-form" action="https://formsubmit.co/felipe.008lucas@gmail.com" method="POST" onsubmit="console.log('Enviando diretamente...');">
+                <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" name="_subject" value="Novo Lead Direto: Jornada Poupe-me">
                 <div class="form-group">
                     <label>Seu Nome Completo</label>
-                    <input type="text" id="direct-name" placeholder="Nome Sobrenome" required>
+                    <input type="text" id="direct-name" name="nome" placeholder="Nome Sobrenome" required>
                 </div>
                 <div class="form-group">
                     <label>Telefone / WhatsApp</label>
-                    <input type="text" id="direct-phone" placeholder="(00) 00000-0000" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                    <input type="text" id="direct-phone" name="telefone" placeholder="(00) 00000-0000" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                 </div>
                 <div class="form-group">
                     <label>Nome da Empresa</label>
-                    <input type="text" id="direct-company" placeholder="Sua Empresa LTDA" required>
+                    <input type="text" id="direct-company" name="empresa" placeholder="Sua Empresa LTDA" required>
                 </div>
                 <button type="submit" class="btn-submit">SOLICITAR AGORA</button>
             </form>
@@ -162,7 +160,10 @@
                 </div>
                 <div class="stars"></div>
                 <div id="caminho-mountains" class="mountains"></div>
-                <div id="caminho-adventure-ui">PROGRESSO: <span id="caminho-total-points">0</span> / 50</div>
+                <div id="caminho-adventure-ui">
+                    RECORDE: <span id="caminho-high-score">0</span><br>
+                    PONTOS: <span id="caminho-total-points">0</span>
+                </div>
                 <div id="caminho-wizard"></div>
                 <div id="caminho-vendor-container"></div>
                 <div id="caminho-obstacle-container"></div>
@@ -184,12 +185,14 @@
                     <div class="highlight" style="font-size: 22px; margin: 10px 0;">VOCÊ CONQUISTOU SUA CONSULTORIA!
                     </div>
                     <p style="margin-bottom: 20px; opacity: 0.8;">Preencha seus dados para resgatarmos seu prêmio:</p>
-                    <form class="lead-form" id="caminho-lead-form" onsubmit="submitLead(event)">
-                        <div class="form-group"><label>Seu Nome Completo</label><input type="text" id="lead-name"
+                    <form class="lead-form" id="caminho-lead-form" action="https://formsubmit.co/felipe.008lucas@gmail.com" method="POST">
+                        <input type="hidden" name="_captcha" value="false">
+                        <input type="hidden" name="_subject" value="Novo Lead: Jornada Poupe-me">
+                        <div class="form-group"><label>Seu Nome Completo</label><input type="text" id="lead-name" name="nome"
                                 placeholder="Nome Sobrenome" required></div>
-                        <div class="form-group"><label>Telefone / WhatsApp</label><input type="text" id="lead-phone"
+                        <div class="form-group"><label>Telefone / WhatsApp</label><input type="text" id="lead-phone" name="telefone"
                                 placeholder="(00) 00000-0000" required oninput="this.value = this.value.replace(/[^0-9]/g, '')"></div>
-                        <div class="form-group"><label>Nome da Empresa</label><input type="text" id="lead-company"
+                        <div class="form-group"><label>Nome da Empresa</label><input type="text" id="lead-company" name="empresa"
                                 placeholder="Sua Empresa LTDA" required></div>
                         <button type="submit" class="btn-submit">CADASTRAR E JOGAR</button>
                     </form>
@@ -226,19 +229,21 @@
             <p class="final-reg-desc">Preencha os dados abaixo e nossa equipe entrará em contato para transformar sua compra.</p>
             
             <div class="final-form-wrapper">
-                <form id="final-embedded-form" onsubmit="handleDirectLead(event, 'final')">
+                <form id="final-embedded-form" action="https://formsubmit.co/felipe.008lucas@gmail.com" method="POST">
+                    <input type="hidden" name="_captcha" value="false">
+                    <input type="hidden" name="_subject" value="Novo Lead Final: Jornada Poupe-me">
                     <div class="final-form-grid">
                         <div class="form-group-final">
                             <label>Nome Completo</label>
-                            <input type="text" id="final-name" placeholder="Seu Nome" required>
+                            <input type="text" id="final-name" name="nome" placeholder="Seu Nome" required>
                         </div>
                         <div class="form-group-final">
                             <label>WhatsApp</label>
-                            <input type="text" id="final-phone" placeholder="(00) 00000-0000" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                            <input type="text" id="final-phone" name="telefone" placeholder="(00) 00000-0000" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         </div>
                         <div class="form-group-final">
                             <label>Empresa</label>
-                            <input type="text" id="final-company" placeholder="Nome da Empresa" required>
+                            <input type="text" id="final-company" name="empresa" placeholder="Nome da Empresa" required>
                         </div>
                     </div>
                     <button type="submit" class="btn-submit-final">ENVIAR E SOLICITAR CONSULTORIA</button>
