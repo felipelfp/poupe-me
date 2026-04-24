@@ -1809,16 +1809,18 @@ section {
     }
 
     #mapa-bubble-container {
-        left: 80px !important;
-        transform: none !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
         width: 150px !important;
-        bottom: 110% !important;
+        bottom: 105% !important;
+        position: absolute !important;
     }
 
     #mapa-dots {
-        left: 65px !important;
-        transform: none !important;
-        bottom: 105% !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        bottom: 100% !important;
+        position: absolute !important;
     }
 
     #mapa-bubble-text {
