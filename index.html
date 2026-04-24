@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poupe-me | Sua Compra Elite</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="./1-removebg-preview.png">
+</head>
+
+<body>
+    <div id="success-modal" class="modal-overlay">
+        <div class="modal-content success-box">
+            <div class="success-icon">✓</div>
+            <h2 class="modal-title">Enviado com Sucesso!</h2>
+            <p class="modal-desc">Nossa equipe elite já recebeu seus dados e entrará em contato em breve para
+                transformar sua jornada.</p>
+            <button class="btn-submit" onclick="closeSuccessModal()">ENTENDIDO</button>
+        </div>
+    </div>
+    <header class="brand-logo-container">
+        <img src="Vertical Tijolo.png" alt="Poupe-me Logo" class="brand-logo-img">
+    </header>
+
+    <div class="top-announcement-bar">
+        Bem-vindo ao mundo do Poupe-me
+    </div>
+
+    <div class="bg-pattern"></div>
+
+    <div id="direct-lead-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeDirectLeadForm()">×</button>
+            <h2 class="modal-title">Consultoria Estratégica</h2>
+            <p class="modal-desc">Preencha os dados abaixo para receber um contato exclusivo da nossa equipe elite.</p>
+            <form id="direct-lead-form" class="lead-form-submit" method="POST" onsubmit="handleDirectLead(event)">
+                <input type="hidden" name="origem" value="">
+                <input type="hidden" name="respostas_jogo_agrupadas" value="">
+                <input type="hidden" name="pergunta_1" value="">
+                <input type="hidden" name="resposta_1" value="">
+                <input type="hidden" name="pergunta_2" value="">
+                <input type="hidden" name="resposta_2" value="">
+                <input type="hidden" name="pergunta_3" value="">
+                <input type="hidden" name="resposta_3" value="">
+                <input type="hidden" name="respostas_diagnostico_json" value="">
+                <input type="hidden" name="respostas_diagnostico_detalhadas" value="">
+                <input type="hidden" name="_subject" value="">
+                <input type="hidden" name="_captcha" value="false">
+                <div class="form-group">
+                    <label>Seu Nome Completo</label>
+                    <input type="text" id="direct-name" name="nome" placeholder="Nome Sobrenome" required>
+                </div>
+                <div class="form-group">
+                    <label>Telefone / WhatsApp</label>
+                    <input type="text" id="direct-phone" name="telefone" placeholder="(00) 00000-0000" required
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                </div>
+                <div class="form-group">
+                    <label>Nome da Empresa</label>
+                    <input type="text" id="direct-company" name="empresa" placeholder="Sua Empresa LTDA" required>
+                </div>
+                <button type="submit" class="btn-submit">SOLICITAR AGORA</button>
+            </form>
+        </div>
+    </div>
+
+    <section id="home" class="hero-section">
+        <div class="content-main">
+            <h1 class="main-title">
+                Somos a <span class="highlight">engrenagem invisível</span> que mantém as empresas rodando todos os
+                dias!
+            </h1>
+
+            <ul class="features-list">
+                <li class="feature-item">Mercado especializado em atendimento B2b</li>
+                <li class="feature-item">Somos referência em suprimentos e compras inteligentes</li>
+                <li class="feature-item">Mais de 1000 empresas atendidas em Curitiba e Região</li>
+            </ul>
+
+            <div class="cta-container">
+                <a href="#mapa" class="cta-button">DESCUBRA UMA NOVA JORNADA</a>
+            </div>
+
+            <div class="scroll-indicator">
+                <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 2px;">Role para
+                    descobrir</span>
+                <div class="scroll-line"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="mapa" class="game-section">
+        <div class="game-iframe-container" id="mapa-game-wrapper">
+            <div id="mapa-inner-container">
+                <div id="mapa-title">JORNADA DA EFICIÊNCIA DE COMPRAS CORPORATIVAS</div>
+                <div class="road-viewport">
+                    <div class="road" id="mapa-road"></div>
+                    <div id="mapa-player">
+                        <div class="thought-bubble-container" id="mapa-bubble-container">
+                            <svg class="cloud-svg" viewBox="0 0 120 70">
+                                <path
+                                    d="M10 35 C10 15, 30 10, 60 10 C90 10, 110 15, 110 35 C110 55, 90 60, 60 60 C30 60, 10 55, 10 35 Z"
+                                    fill="white" stroke="black" stroke-width="2" />
+                            </svg>
+                            <div class="thought-text" id="mapa-bubble-text"></div>
+                        </div>
+                        <div class="thought-dots" id="mapa-dots">
+                            <div
+                                style="width: 10px; height: 10px; bottom: 10px; left: 50%; transform: translateX(-50%);">
+                            </div>
+                            <div style="width: 6px; height: 6px; bottom: 0px; left: 50%; transform: translateX(-50%);">
+                            </div>
+                        </div>
+                        <div class="player-sprite"></div>
+                    </div>
+                    <svg id="mapa-jump-path" viewBox="0 0 1000 1000" preserveAspectRatio="none">
+                        <path class="dash-line" d="M 50,650 Q 500,150 950,650" />
+                    </svg>
+                    <svg id="mapa-jump-path-mobile" viewBox="0 0 400 1000" preserveAspectRatio="none">
+                        <path class="dash-line" d="M 75,150 Q 300,500 75,900" />
+                    </svg>
+                    <div class="milestone" id="mapa-m1">
+                        <div class="company-bubble">
+                            <svg class="cloud-svg company-bubble-svg" viewBox="0 0 120 70">
+                                <path d="M10 35 C10 15, 30 10, 60 10 C90 10, 110 15, 110 35 C110 55, 90 60, 60 60 C30 60, 10 55, 10 35 Z" fill="#ffffff" stroke="#e67e22" stroke-width="2" />
+                            </svg>
+                            <div class="company-bubble-text">Acabaram os insumos!</div>
+                            <div class="company-bubble-dot1"></div>
+                            <div class="company-bubble-dot2"></div>
+                        </div>
+                        <div class="milestone-box">Solicitação de Compra</div>
+                        <img src="https://img.icons8.com/3d-fluency/94/document.png" class="chaos-icon-img"
+                            style="top: -70px;">
+                    </div>
+                    <div class="milestone" id="mapa-m2">
+                        <div class="milestone-box">Cotação</div>
+                        <img src="https://img.icons8.com/3d-fluency/94/mail.png" class="chaos-icon-img"
+                            style="top: -70px;">
+                    </div>
+                    <div class="milestone" id="mapa-m3">
+                        <div class="milestone-box">Equalização</div>
+                        <img src="https://img.icons8.com/3d-fluency/94/bar-chart.png" class="chaos-icon-img"
+                            style="top: -70px;">
+                    </div>
+                    <div class="milestone" id="mapa-m4">
+                        <div class="milestone-box">Solicitação de Ajustes</div>
+                        <img src="https://img.icons8.com/3d-fluency/94/clock.png" class="chaos-icon-img"
+                            style="top: -70px;">
+                    </div>
+                    <div class="milestone" id="mapa-m5">
+                        <div class="milestone-box">Aprovação</div>
+                        <img src="https://img.icons8.com/3d-fluency/94/checked-checkbox.png" class="chaos-icon-img"
+                            style="top: -70px;">
+                    </div>
+                    <div class="milestone" id="mapa-m6">
+                        <div class="milestone-box">Ordem de Compra</div>
+                        <img src="https://img.icons8.com/3d-fluency/94/bill.png" class="chaos-icon-img"
+                            style="top: -70px;">
+                    </div>
+                    <div class="milestone" id="mapa-m7">
+                        <div class="milestone-box">Entrega</div>
+                        <img src="https://img.icons8.com/3d-fluency/94/package.png" class="chaos-icon-img"
+                            style="top: -70px;">
+                    </div>
+                </div>
+                <div id="mapa-controls" style="margin-top: 40px; margin-bottom: 40px; text-align: center;">
+                    <button class="mapa-btn chaos" onclick="moveNext()">AVANÇAR</button>
+                    <button class="mapa-btn solution" id="mapa-solution-btn" onclick="CaminhoGame.removeCompletionNotification(); CaminhoGame.applySolution();" style="display: none;">SOLUÇÃO POUPE-ME 🚀</button>
+                </div>
+            </div>
+            <div id="mapa-notification" class="mapa-toast" style="display: none;">
+                <span class="toast-icon">💡</span>
+                <div class="toast-content">
+                    <p class="toast-text">Demorado, né?</p>
+                    <p class="toast-highlight">Tente com o Poupe-me 🚀</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="jogo" class="game-section">
+        <div class="game-iframe-container" id="caminho-game-wrapper">
+            <div class="game-internal-overlay">
+                Neste desafio, descubra se o Poupe-me é para a sua empresa
+            </div>
+            <div id="caminho-world">
+                <div id="caminho-reward-banner">🏆 PARABÉNS! VOCÊ GANHOU 20% DE DESCONTO NA PRIMEIRA COMPRA!</div>
+                <div id="caminho-consultancy-box" class="consultancy-unlock-card" style="display: none;">
+                    <h3>🚀 MAIS UM PRESENTE!</h3>
+                    <p>Você acaba de desbloquear uma <strong>CONSULTORIA GRÁTIS</strong> para otimizar seus custos!</p>
+                    <button class="mapa-btn chaos" onclick="requestConsultancy()">DESBLOQUEAR AGORA</button>
+                </div>
+                <div class="stars"></div>
+
+                <div id="caminho-skyline" class="caminho-skyline" aria-hidden="true">
+                    <div class="caminho-skyline-wrap">
+                        <div class="caminho-skyline-row caminho-skyline-row--far">
+                            <div class="skyline-mini-apt skyline-mini-apt--h2"></div>
+                            <div class="skyline-mini-house"></div>
+                            <div class="skyline-mini-apt skyline-mini-apt--h1"></div>
+                            <div class="skyline-mini-house"></div>
+                            <div class="skyline-mini-apt skyline-mini-apt--h3"></div>
+                            <div class="skyline-mini-house"></div>
+                            <div class="skyline-mini-apt skyline-mini-apt--h1"></div>
+                            <div class="skyline-mini-apt skyline-mini-apt--h2"></div>
+                            <div class="skyline-mini-house"></div>
+                            <div class="skyline-mini-apt skyline-mini-apt--h3"></div>
+                            <div class="skyline-mini-house"></div>
+                            <div class="skyline-mini-apt skyline-mini-apt--h1"></div>
+                            <div class="skyline-mini-house"></div>
+                            <div class="skyline-mini-apt skyline-mini-apt--h2"></div>
+                            <div class="skyline-mini-apt skyline-mini-apt--h1"></div>
+                            <div class="skyline-mini-house"></div>
+                            <div class="skyline-mini-apt skyline-mini-apt--h3"></div>
+                            <div class="skyline-mini-house"></div>
+                            <div class="skyline-mini-apt skyline-mini-apt--h2"></div>
+                            <div class="skyline-mini-house"></div>
+                            <div class="skyline-mini-apt skyline-mini-apt--h1"></div>
+                            <div class="skyline-mini-house"></div>
+                            <div class="skyline-mini-apt skyline-mini-apt--h3"></div>
+                            <div class="skyline-mini-apt skyline-mini-apt--h1"></div>
+                            <div class="skyline-mini-house"></div>
+                            <div class="skyline-mini-apt skyline-mini-apt--h2"></div>
+                        </div>
+                        <div class="caminho-skyline-row caminho-skyline-row--near">
+                            <div class="skyline-home skyline-home--a">
+                                <div class="skyline-home__roof"></div>
+                                <div class="skyline-home__body"></div>
+                            </div>
+                            <div class="skyline-apt skyline-apt--short"></div>
+                            <div class="skyline-mini-apt skyline-mini-apt--h2"></div>
+                            <div class="skyline-home skyline-home--b">
+                                <div class="skyline-home__roof"></div>
+                                <div class="skyline-home__body skyline-home__body--warm"></div>
+                            </div>
+                            <div class="skyline-apt skyline-apt--xs"></div>
+                            <div class="skyline-apt skyline-apt--tall"></div>
+                            <div class="skyline-home skyline-home--c">
+                                <div class="skyline-home__roof"></div>
+                                <div class="skyline-home__body"></div>
+                            </div>
+                            <div class="skyline-apt skyline-apt--mid"></div>
+                            <div class="skyline-mini-house"></div>
+                            <div class="skyline-apt skyline-apt--thin"></div>
+                            <div class="skyline-home skyline-home--d">
+                                <div class="skyline-home__roof"></div>
+                                <div class="skyline-home__body skyline-home__body--warm"></div>
+                            </div>
+                            <div class="skyline-apt skyline-apt--wide"></div>
+                            <div class="skyline-mini-apt skyline-mini-apt--h1"></div>
+                            <div class="skyline-home skyline-home--a">
+                                <div class="skyline-home__roof"></div>
+                                <div class="skyline-home__body"></div>
+                            </div>
+                            <div class="skyline-apt skyline-apt--short"></div>
+                            <div class="skyline-apt skyline-apt--mid"></div>
+                            <div class="skyline-mini-house"></div>
+                            <div class="skyline-apt skyline-apt--xs"></div>
+                            <div class="skyline-home skyline-home--c">
+                                <div class="skyline-home__roof"></div>
+                                <div class="skyline-home__body"></div>
+                            </div>
+                            <div class="skyline-apt skyline-apt--tall"></div>
+                            <div class="skyline-mini-apt skyline-mini-apt--h3"></div>
+                            <div class="skyline-apt skyline-apt--thin"></div>
+                            <div class="skyline-home skyline-home--b">
+                                <div class="skyline-home__roof"></div>
+                                <div class="skyline-home__body skyline-home__body--warm"></div>
+                            </div>
+                            <div class="skyline-apt skyline-apt--wide"></div>
+                            <div class="skyline-mini-house"></div>
+                            <div class="skyline-apt skyline-apt--short"></div>
+                            <div class="skyline-home skyline-home--d">
+                                <div class="skyline-home__roof"></div>
+                                <div class="skyline-home__body skyline-home__body--warm"></div>
+                            </div>
+                            <div class="skyline-apt skyline-apt--mid"></div>
+                            <div class="skyline-mini-apt skyline-mini-apt--h2"></div>
+                            <div class="skyline-apt skyline-apt--xs"></div>
+                            <div class="skyline-home skyline-home--a">
+                                <div class="skyline-home__roof"></div>
+                                <div class="skyline-home__body"></div>
+                            </div>
+                            <div class="skyline-apt skyline-apt--thin"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="caminho-adventure-ui">
+                    RECORDE: <span id="caminho-high-score">0</span><br>
+                    PONTOS: <span id="caminho-total-points">0</span>
+                </div>
+                <div id="caminho-wizard"></div>
+                <div id="caminho-vendor-container"></div>
+                <div id="caminho-obstacle-container"></div>
+                <div class="ground">
+                    <div class="path"></div>
+                </div>
+                <div id="caminho-dialog-box">
+                    <h2 id="caminho-vendor-name">Mercador</h2>
+                    <p id="caminho-dialog-text">O que você busca, viajante?</p>
+                    <div id="caminho-options-container"></div>
+                </div>
+                <div id="caminho-adventure-msg">
+                    <h1 id="caminho-msg-title">A CORRIDA PELA EFICIÊNCIA!</h1>
+                    <p id="caminho-msg-desc">Use ESPAÇO ou toque na tela para pular.</p>
+                    <p id="caminho-msg-sub" style="color: #ffd700; margin-top: 10px;">Chegue a 50 pontos para resgatar
+                        seu prêmio!</p>
+                </div>
+                <div id="caminho-win-screen">
+                    <div class="win-content-wrapper">
+                        <div class="win-card reward-card">
+                            <div class="reward-icon">
+                                <img src="Vertical Tijolo.png" style="width: 100%; max-width: 150px; filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.3));">
+                            </div>
+                            <h1>PARABÉNS!</h1>
+                            <div class="discount-badge">VOCÊ GANHOU 20% DE DESCONTO</div>
+                            <p class="reward-text">Gostaria de ganhar mais? Jogue e desbloqueie um novo brinde!</p>
+                        </div>
+                        
+                        <div class="win-card form-card" id="win-lead-form-container">
+                            <h2 class="form-title">RESGATE SEU PRÊMIO</h2>
+                            <form id="caminho-lead-form" class="lead-form-submit" method="POST">
+                                <input type="hidden" name="origem" value="">
+                                <input type="hidden" name="respostas_jogo_agrupadas" value="">
+                                <input type="hidden" name="pergunta_1" value="">
+                                <input type="hidden" name="resposta_1" value="">
+                                <input type="hidden" name="pergunta_2" value="">
+                                <input type="hidden" name="resposta_2" value="">
+                                <input type="hidden" name="pergunta_3" value="">
+                                <input type="hidden" name="resposta_3" value="">
+                                <input type="hidden" name="respostas_diagnostico_json" value="">
+                                <input type="hidden" name="respostas_diagnostico_detalhadas" value="">
+                                <input type="hidden" name="_subject" value="">
+                                <input type="hidden" name="_captcha" value="false">
+                                <div class="form-group">
+                                    <label>SEU NOME COMPLETO</label>
+                                    <input type="text" id="adv-name" name="nome" placeholder="Nome Sobrenome" required minlength="6" maxlength="120">
+                                </div>
+                                <div class="form-group">
+                                    <label>TELEFONE / WHATSAPP</label>
+                                    <input type="text" id="adv-phone" name="telefone" placeholder="41991665981" required minlength="11" maxlength="11" inputmode="numeric" pattern="[0-9]{11}" title="Digite 11 números no formato 41991665981"
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,11)">
+                                </div>
+                                <div class="form-group">
+                                    <label>E-MAIL</label>
+                                    <input type="email" id="adv-email" name="email" placeholder="seu@email.com" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>NOME DA EMPRESA</label>
+                                    <input type="text" id="adv-company" name="empresa" placeholder="Sua Empresa LTDA" required minlength="2" maxlength="120">
+                                </div>
+                                <button type="submit" class="btn-submit">CADASTRAR E DESBLOQUEAR CONSULTORIA</button>
+                            </form>
+                            <button class="option-btn"
+                                style="width: auto; padding: 10px 20px; margin-top: 20px; font-size: 10px; border: none; background: transparent; opacity: 0.5;"
+                                onclick="resetCaminhoGame()">JOGAR NOVAMENTE</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="caminho-game-over-screen">
+                    <h1>OPS! VOCÊ BATEU!</h1>
+                    <p>Não desista, o prêmio está te esperando!</p>
+                    <button class="option-btn" style="width: auto; padding: 15px 40px;"
+                        onclick="restartCaminhoRun()">TENTAR DE NOVO (REPLAY)</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="video-apresentacao" class="video-section">
+        <div class="video-content-header">
+            <h2 class="video-title">Conheça a <span class="highlight">Revolução</span> Poupe-me</h2>
+            <p class="video-subtitle">Entenda como transformamos suas compras de suprimentos em eficiência pura.</p>
+        </div>
+        <div class="video-container">
+            <video id="apresentacao-video" controls autoplay muted loop playsinline preload="metadata" poster="Vertical Tijolo.png">
+                <source src="Poupe-me.mp4" type="video/mp4">
+                Seu navegador não suporta vídeos.
+            </video>
+            <button id="video-start-btn" type="button" aria-label="Reproduzir vídeo com som">
+                ▶ PLAY
+            </button>
+        </div>
+    </section>
+
+    <section id="cadastro-final" class="final-registration-section">
+        <div class="final-reg-content">
+            <h2 class="final-reg-title">Pronto para a <span class="highlight">Eficiência?</span></h2>
+            <p class="final-reg-desc">Preencha os dados abaixo e nossa equipe entrará em contato para transformar sua
+                compra.</p>
+
+            <div class="final-form-wrapper">
+                <form id="final-embedded-form" class="lead-form-submit" method="POST" onsubmit="handleDirectLead(event, 'final')">
+                    <input type="hidden" name="origem" value="">
+                    <input type="hidden" name="respostas_jogo_agrupadas" value="">
+                    <input type="hidden" name="pergunta_1" value="">
+                    <input type="hidden" name="resposta_1" value="">
+                    <input type="hidden" name="pergunta_2" value="">
+                    <input type="hidden" name="resposta_2" value="">
+                    <input type="hidden" name="pergunta_3" value="">
+                    <input type="hidden" name="resposta_3" value="">
+                    <input type="hidden" name="respostas_diagnostico_json" value="">
+                    <input type="hidden" name="respostas_diagnostico_detalhadas" value="">
+                    <input type="hidden" name="_subject" value="">
+                    <input type="hidden" name="_captcha" value="false">
+                    <div class="final-form-grid">
+                        <div class="form-group-final">
+                            <label>Nome Completo</label>
+                            <input type="text" id="final-name" name="nome" placeholder="Seu Nome e Sobrenome" required minlength="6" maxlength="120">
+                        </div>
+                        <div class="form-group-final">
+                            <label>WhatsApp</label>
+                            <input type="text" id="final-phone" name="telefone" placeholder="41991665981" required minlength="11" maxlength="11" inputmode="numeric" pattern="[0-9]{11}" title="Digite 11 números no formato 41991665981"
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,11)">
+                        </div>
+                        <div class="form-group-final">
+                            <label>Empresa</label>
+                            <input type="text" id="final-company" name="empresa" placeholder="Nome da Empresa" required minlength="2" maxlength="120">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit-final">ENVIAR E SOLICITAR CONSULTORIA</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="site-footer-section">
+        <div class="footer-content">
+            <p class="footer-contact-line">
+                <a href="https://www.instagram.com/mercado_poupeme?igsh=MTduYWl4cHB2cXIyZg==" target="_blank" rel="noopener noreferrer"
+                    style="display: inline-flex; align-items: center; gap: 8px; margin-right: 6px; vertical-align: middle; text-decoration: none; color: #d4af37; font-weight: 600; font-size: 14px;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram"
+                        style="width: 25px; height: 25px; opacity: 0.75;">
+                    <span>@mercado_poupeme</span>
+                </a>
+                <span style="color: rgba(255,255,255,0.5);">—</span>
+                <a href="https://api.whatsapp.com/send?phone=5541995731749&text=Ol%C3%A1%2C%20gostaria%20de%20saber%20mais%20sobre%20o%20Poupe-me%21" 
+                    class="footer-whatsapp-line" target="_blank" rel="noopener noreferrer" title="Conversar no WhatsApp" style="margin-left: 6px; color: #d4af37; font-weight: 600; font-size: 14px; text-decoration: none; white-space: nowrap;">(41) 99573-1749</a>
+            </p>
+            <p class="footer-copyright-line">
+                &copy; 2026 <a href="https://www.poupe-me.com/" target="_blank">POUPE-ME COMÉRCIO ALIMENTÍCIO LTDA</a>.
+                Todos os direitos reservados.
+            </p>
+            <p>CNPJ: 39.366.795/0001-91 - Endereço: Rua Miguel Abrão, 480 - Portão, Curitiba - PR, 80070-140</p>
+            <p style="margin-top: 15px;">
+                Desenvolvido por <a href="https://www.instagram.com/p/DW0G8Y2jEle/" target="_blank">covii.soft</a>
+                <button onclick="exportLeadsReport()" title="Acesso Restrito"
+                    style="background:none; border:none; color:var(--gold); cursor:pointer; font-size:14px; margin-left:10px; opacity:0.5; transition:0.3s;"
+                    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">🔒</button>
+            </p>
+        </div>
+    </footer>
+
+    <a href="https://api.whatsapp.com/send?phone=5541995731749&text=Ol%C3%A1%2C%20gostaria%20de%20saber%20mais%20sobre%20o%20Poupe-me%21"
+        class="whatsapp-btn" target="_blank" rel="noopener noreferrer" title="WhatsApp (41) 99573-1749" aria-label="Abrir conversa no WhatsApp: (41) 99573-1749">
+        <svg viewBox="0 0 24 24" width="35" height="35" fill="white" aria-hidden="true">
+            <path
+                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+        </svg>
+    </a>
+
+    <button id="jump-btn" type="button" onclick="triggerJumpButton(event)" ontouchstart="triggerJumpButton(event)" onpointerdown="triggerJumpButton(event)"
+        style="display:none;position:fixed;bottom:100px;right:20px;z-index:120000;width:64px;height:64px;background:#d4af37;color:#000;border:none;border-radius:50%;font-size:28px;font-weight:900;cursor:pointer;box-shadow:0 4px 20px rgba(212,175,55,0.6);-webkit-tap-highlight-color:transparent;pointer-events:auto;user-select:none;padding:0;margin:0;transition:transform 0.1s ease, box-shadow 0.1s ease;">⬆</button>
+    <script src="script.js"></script>
+</body>
+
+</html>
