@@ -1,11 +1,4 @@
-/**
- * CONFIGURAÇÃO DO SITE — edite só este bloco.
- * Salvar o arquivo já grava no disco; commit no Git é opcional (só quando quiser versionar/enviar).
- *
- * Make: recebe JSON com nome, telefone, empresa, origem, respostas do diagnóstico (array + texto + P1–P3).
- * FormSubmit: use formSubmitEmail OU formSubmitFullUrl. No primeiro envio real, abra o e-mail e confirme o link do FormSubmit.
- * Dica: atributos data-formsubmit / data-formsubmit-email no <body> do index.html ainda podem sobrescreber (útil em testes).
- */
+
 const SITE_CONFIG = {
     makeWebhookUrl: 'https://hook.us1.make.com/6v30h5vujr9vlygexndx77q2fujv7f7v',
     formSubmitEmail: 'felipe008lucas@gmail.com',
